@@ -73,7 +73,7 @@ Stgy_DF['SigVixg30']=(0+(np.sign(Stgy_DF['Close_VIX']-LimVixUp)==1))
 Stgy_DF['SigVixs20']=(0+(np.sign(LimVixDw-Stgy_DF['Close_VIX'])==1))
 Stgy_DF['SigRetg+5']=np.nan
 Stgy_DF['SigRets-5']=np.nan
-Stgy_DF['InvestVal']=0
+Stgy_DF['InvestVal']=np.nan
 Stgy_DF['InvestOp']=np.nan
 Stgy_DF['StrgRet']=0
 Stgy_DF['StrgDecitions']=np.nan
@@ -96,30 +96,30 @@ for i in range(len(Stgy_DF)):
     if  np.isnan(Stgy_DF.loc[i,'InvestOp'])!=True and Stgy_DF.loc[i-1,'StrgDecitions']=='sell':
       Stgy_DF.loc[i,'StrgDecitions']='sell'
       Stgy_DF.loc[i,'InvestVal']=Stgy_DF.loc[i-1,'InvestVal']
-      print(Stgy_DF[i-1:i+2])
+      ##print(Stgy_DF[i-1:i+2])
     elif np.isnan(Stgy_DF.loc[i,'InvestOp'])==True and Stgy_DF.loc[i-1,'StrgDecitions']=='sell':
       Stgy_DF.loc[i,'StrgDecitions']='sell'
       Stgy_DF.loc[i,'InvestOp']=Stgy_DF.loc[i-1,'InvestOp']
       Stgy_DF.loc[i,'InvestVal']=Stgy_DF.loc[i-1,'InvestVal']
-      print(Stgy_DF[i-1:i+2])
+      ##print(Stgy_DF[i-1:i+2])
     #last signal buy
     if np.isnan(Stgy_DF.loc[i,'InvestOp'])!=True and Stgy_DF.loc[i-1,'StrgDecitions']=='buy':
       Stgy_DF.loc[i,'StrgDecitions']='buy'
       Stgy_DF.loc[i,'InvestVal']=Stgy_DF.loc[i-1,'InvestVal']*(1+Stgy_DF.loc[i,'Ret'])
-      print(Stgy_DF[i-1:i+2])
+      ##print(Stgy_DF[i-1:i+2])
     elif np.isnan(Stgy_DF.loc[i,'InvestOp'])==True and Stgy_DF.loc[i-1,'StrgDecitions']=='buy':
       Stgy_DF.loc[i,'StrgDecitions']='buy'
       Stgy_DF.loc[i,'InvestOp']=Stgy_DF.loc[i-1,'InvestOp']
       Stgy_DF.loc[i,'InvestVal']=Stgy_DF.loc[i-1,'InvestVal']*(1+Stgy_DF.loc[i,'Ret'])
-      print(Stgy_DF[i-1:i+2])
+      ##print(Stgy_DF[i-1:i+2])
 
   #Strategy returns calculation
   if np.isnan(Stgy_DF.loc[i,'InvestOp'])==True:
     Stgy_DF.loc[i,'StrgRet']=0
   else:
     Stgy_DF.loc[i,'StrgRet']=Stgy_DF.loc[i,'InvestVal']/Stgy_DF.loc[i,'InvestOp']-1
-  if i==28:
-    print(i)
+  ##if i==28:
+  ##  print(i)
 
   if Stgy_DF.loc[i,'SigVixg30']==1:
     #buy
@@ -129,7 +129,7 @@ for i in range(len(Stgy_DF)):
       Stgy_DF.loc[i,'InvestOp']=Stgy_DF.loc[i,'InvestVal']
       Stgy_DF.loc[i+1,'InvestOp']=Stgy_DF.loc[i,'InvestVal']
       Stgy_DF.loc[i,'StrgRet']=Stgy_DF.loc[i,'InvestVal']/Stgy_DF.loc[i,'InvestOp']-1
-      print(Stgy_DF[i-1:i+2])
+      ##print(Stgy_DF[i-1:i+2])
       DecCount=+1
     elif DecCount>=0 and Stgy_DF.loc[i-1,'StrgDecitions']=='sell':
       Stgy_DF.loc[i,'StrgDecitions']='buy'
@@ -137,7 +137,7 @@ for i in range(len(Stgy_DF)):
       Stgy_DF.loc[i,'InvestVal']=Stgy_DF.loc[i,'InvestOp']
       Stgy_DF.loc[i+1,'InvestOp']=Stgy_DF.loc[i,'InvestVal']
       Stgy_DF.loc[i,'StrgRet']=Stgy_DF.loc[i,'InvestVal']/Stgy_DF.loc[i,'InvestOp']-1
-      print(Stgy_DF[i-1:i+2])
+      ##print(Stgy_DF[i-1:i+2])
       DecCount=+1
   
   #Stop loss - Take profit
@@ -159,7 +159,20 @@ for i in range(len(Stgy_DF)):
       Stgy_DF.loc[i,'InvestVal']=Stgy_DF.loc[i-1,'InvestVal']*(1+Stgy_DF.loc[i,'Ret'])
       Stgy_DF.loc[i+1,'InvestOp']=Stgy_DF.loc[i,'InvestVal']
       Stgy_DF.loc[i,'StrgRet']=Stgy_DF.loc[i,'InvestVal']/Stgy_DF.loc[i,'InvestOp']-1
-      print(Stgy_DF[i-1:i+2])
+      ##print(Stgy_DF[i-1:i+2])
       DecCount=+1
-  print(Stgy_DF[i-1:i+2])
+  ##print(Stgy_DF[i-1:i+2])
       
+Stgy_DF['InvestVal'].bfill(inplace=True)
+
+fig, axs = plt.subplots(2,figsize=(10,7))
+fig
+fig.suptitle('S&P500 VIX strategy')
+axs0=axs[0].twinx()
+axs[0].plot(Stgy_DF['Date'], Stgy_DF['Close_SP'], color='black',label='SP500') 
+axs0.plot(Stgy_DF['Date'], Stgy_DF['Close_VIX'], color='red',label='VIX',linestyle='dotted')
+axs[1].plot(Stgy_DF['Date'],Stgy_DF['InvestVal'], color='green',label='Return')
+axs[0].legend(loc='upper left')
+axs0.legend(loc='lower left')
+axs[1].legend(loc='upper left')
+plt.show()
